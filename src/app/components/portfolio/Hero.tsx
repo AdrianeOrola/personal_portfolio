@@ -219,7 +219,7 @@ export function Hero() {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="relative aspect-[4/4.5] max-w-[400px] mx-auto w-full hidden lg:block"
+          className="relative aspect-[4/4.5] max-w-[400px] mx-auto w-full order-first lg:order-none mt-4 lg:mt-0"
         >
           {/* Glow */}
           <div
