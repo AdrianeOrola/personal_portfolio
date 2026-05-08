@@ -9,6 +9,27 @@ import { Certifications } from "./components/portfolio/Certifications";
 import { Contact } from "./components/portfolio/Contact";
 import { Footer } from "./components/portfolio/Footer";
 import { Loader } from "./components/portfolio/Loader";
+import { Analytics } from '@vercel/analytics/next';  
+
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <title>Next.js</title>
+      </head>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  );
+}
+
 
 export default function App() {
   const [dark, setDark] = useState(true);
