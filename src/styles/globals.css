@@ -1,0 +1,39 @@
+/* Smooth anchor scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Selection */
+::selection {
+  background: var(--vibrant-muted);
+  color: var(--vibrant);
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--vibrant);
+  outline-offset: 2px;
+}
+
+/* Glass card utility */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
