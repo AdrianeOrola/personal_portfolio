@@ -64,7 +64,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16"
+      className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-32 md:pb-20"
     >
       {/* Mouse-tracked radial glow */}
       <div
@@ -324,7 +324,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-muted-foreground"
+        className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-muted-foreground"
       >
         <span className="text-xs tracking-widest uppercase">Scroll</span>
         <motion.div

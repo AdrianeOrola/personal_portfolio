@@ -54,7 +54,7 @@ const projects: Project[] = [
     image: jbmTradingImage,
     color: "#10b981",
     status: "Live",
-    year: "2024",
+    year: "2025",
     stars: 0,
     featured: true,
     github: "https://github.com/AdrianeOrola/JBM-TRADING",

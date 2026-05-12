@@ -1,4 +1,4 @@
-import { motion, useInView } from "motion/react";
+import { motion } from "motion/react";
 import { Section } from "./Section";
 import {
   Code2,
@@ -7,19 +7,29 @@ import {
   Database,
   Network,
   Wrench,
+  Box,
 } from "lucide-react";
-import { useRef } from "react";
+import { useState } from "react";
 
-const groups = [
+type Tech = { name: string; slug: string; color: string };
+
+const groups: {
+  icon: typeof Code2;
+  title: string;
+  color: string;
+  items: Tech[];
+}[] = [
   {
     icon: Code2,
     title: "Frontend",
     color: "#6366f1",
     items: [
-      { name: "React / Next.js", level: 92 },
-      { name: "TypeScript", level: 88 },
-      { name: "Tailwind CSS", level: 90 },
-      { name: "Motion / Framer", level: 80 },
+      { name: "React", slug: "react", color: "61DAFB" },
+      { name: "Next.js", slug: "nextdotjs", color: "FFFFFF" },
+      { name: "TypeScript", slug: "typescript", color: "3178C6" },
+      { name: "Tailwind CSS", slug: "tailwindcss", color: "06B6D4" },
+      { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+      { name: "HTML5", slug: "html5", color: "E34F26" },
     ],
   },
   {
@@ -27,10 +37,12 @@ const groups = [
     title: "Backend",
     color: "#10b981",
     items: [
-      { name: "Node.js", level: 85 },
-      { name: "Java / Spring", level: 82 },
-      { name: "Python / FastAPI", level: 88 },
-      { name: "GraphQL", level: 72 },
+      { name: "Node.js", slug: "nodedotjs", color: "5FA04E" },
+      { name: "Java", slug: "openjdk", color: "FFFFFF" },
+      { name: "Spring", slug: "spring", color: "6DB33F" },
+      { name: "Python", slug: "python", color: "3776AB" },
+      { name: "FastAPI", slug: "fastapi", color: "009688" },
+      { name: "GraphQL", slug: "graphql", color: "E10098" },
     ],
   },
   {
@@ -38,10 +50,12 @@ const groups = [
     title: "Databases",
     color: "#f59e0b",
     items: [
-      { name: "PostgreSQL", level: 86 },
-      { name: "MongoDB", level: 78 },
-      { name: "Redis", level: 70 },
-      { name: "Prisma / ORM", level: 82 },
+      { name: "PostgreSQL", slug: "postgresql", color: "4169E1" },
+      { name: "MongoDB", slug: "mongodb", color: "47A248" },
+      { name: "MySQL", slug: "mysql", color: "4479A1" },
+      { name: "Redis", slug: "redis", color: "FF4438" },
+      { name: "Supabase", slug: "supabase", color: "3FCF8E" },
+      { name: "Prisma", slug: "prisma", color: "FFFFFF" },
     ],
   },
   {
@@ -49,10 +63,12 @@ const groups = [
     title: "Networking",
     color: "#3b82f6",
     items: [
-      { name: "TCP/IP protocols", level: 85 },
-      { name: "DNS / HTTP(S)", level: 88 },
-      { name: "Cisco IOS / CCNA", level: 75 },
-      { name: "Wireshark", level: 80 },
+      { name: "Cisco", slug: "cisco", color: "1BA0D7" },
+      { name: "Wireshark", slug: "wireshark", color: "1679A7" },
+      { name: "Cloudflare", slug: "cloudflare", color: "F38020" },
+      { name: "OpenSSL", slug: "openssl", color: "721412" },
+      { name: "Nginx", slug: "nginx", color: "009639" },
+      { name: "Postman", slug: "postman", color: "FF6C37" },
     ],
   },
   {
@@ -60,10 +76,12 @@ const groups = [
     title: "UI / Design",
     color: "#ec4899",
     items: [
-      { name: "Figma", level: 84 },
-      { name: "Design Systems", level: 80 },
-      { name: "Accessibility", level: 78 },
-      { name: "Prototyping", level: 82 },
+      { name: "Figma", slug: "figma", color: "F24E1E" },
+      { name: "Adobe XD", slug: "adobexd", color: "FF61F6" },
+      { name: "Photoshop", slug: "adobephotoshop", color: "31A8FF" },
+      { name: "Framer", slug: "framer", color: "0055FF" },
+      { name: "Canva", slug: "canva", color: "00C4CC" },
+      { name: "Storybook", slug: "storybook", color: "FF4785" },
     ],
   },
   {
@@ -71,44 +89,75 @@ const groups = [
     title: "DevOps & Tools",
     color: "#8b5cf6",
     items: [
-      { name: "Git / GitHub", level: 94 },
-      { name: "Docker", level: 80 },
-      { name: "AWS / Cloud", level: 74 },
-      { name: "CI/CD Pipelines", level: 76 },
+      { name: "Git", slug: "git", color: "F05032" },
+      { name: "GitHub", slug: "github", color: "FFFFFF" },
+      { name: "Docker", slug: "docker", color: "2496ED" },
+      { name: "Vercel", slug: "vercel", color: "FFFFFF" },
+      { name: "VS Code", slug: "visualstudiocode", color: "007ACC" },
+      { name: "Linux", slug: "linux", color: "FCC624" },
     ],
   },
 ];
 
-function SkillBar({
-  name,
-  level,
-  color,
+function TechLogo({
+  tech,
+  accent,
   delay,
 }: {
-  name: string;
-  level: number;
-  color: string;
+  tech: Tech;
+  accent: string;
   delay: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const [failed, setFailed] = useState(false);
 
   return (
-    <div ref={ref} className="space-y-1.5">
-      <div className="flex justify-between items-center">
-        <span className="text-sm">{name}</span>
-        <span className="text-xs text-muted-foreground tabular-nums">{level}%</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: color }}
-          initial={{ width: 0 }}
-          animate={{ width: inView ? `${level}%` : 0 }}
-          transition={{ duration: 0.9, delay, ease: "easeOut" }}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.85 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.35, delay }}
+      whileHover={{ y: -4, scale: 1.06 }}
+      className="group/logo relative flex flex-col items-center gap-2"
+      title={tech.name}
+    >
+      <motion.div
+        animate={{ y: [0, -3, 0] }}
+        transition={{
+          duration: 3 + ((delay * 4) % 2),
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl grid place-items-center transition-all duration-300 ring-1 ring-white/10"
+        style={{
+          background:
+            "linear-gradient(145deg, #1a2030 0%, #0b0f1a 100%)",
+        }}
+      >
+        {/* Hover glow */}
+        <span
+          className="pointer-events-none absolute -inset-1 rounded-2xl opacity-0 group-hover/logo:opacity-50 blur-lg transition-opacity duration-300"
+          style={{ background: accent }}
         />
-      </div>
-    </div>
+        {failed ? (
+          <Box
+            className="relative w-6 h-6 sm:w-7 sm:h-7"
+            style={{ color: accent }}
+            aria-label={`${tech.name} (logo unavailable)`}
+          />
+        ) : (
+          <img
+            src={`https://cdn.simpleicons.org/${tech.slug}/${tech.color}`}
+            alt={tech.name}
+            loading="lazy"
+            onError={() => setFailed(true)}
+            className="relative w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform duration-300 group-hover/logo:scale-110"
+          />
+        )}
+      </motion.div>
+      <span className="text-[10px] sm:text-[11px] text-muted-foreground text-center leading-tight">
+        {tech.name}
+      </span>
+    </motion.div>
   );
 }
 
@@ -129,36 +178,35 @@ export function Skills() {
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: i * 0.07 }}
             whileHover={{ y: -4 }}
-            className="group relative p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-shadow hover:shadow-md"
+            className="group relative p-5 sm:p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-shadow hover:shadow-lg"
           >
             {/* Color accent glow */}
             <div
-              className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"
+              className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"
               style={{ background: g.color }}
             />
 
             <div className="relative">
-              {/* Icon */}
-              <div
-                className="w-10 h-10 rounded-xl grid place-items-center mb-4 transition-colors"
-                style={{ background: `${g.color}20`, color: g.color }}
-              >
-                <g.icon className="w-5 h-5" />
+              <div className="flex items-center gap-3 mb-5">
+                <div
+                  className="w-10 h-10 rounded-xl grid place-items-center"
+                  style={{ background: `${g.color}20`, color: g.color }}
+                >
+                  <g.icon className="w-5 h-5" />
+                </div>
+                <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>
+                  {g.title}
+                </h3>
               </div>
 
-              <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>
-                {g.title}
-              </h3>
-
-              {/* Skill bars */}
-              <div className="mt-4 space-y-3">
-                {g.items.map((it, j) => (
-                  <SkillBar
-                    key={it.name}
-                    name={it.name}
-                    level={it.level}
-                    color={g.color}
-                    delay={i * 0.07 + j * 0.06}
+              {/* Logo grid */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                {g.items.map((tech, j) => (
+                  <TechLogo
+                    key={tech.name}
+                    tech={tech}
+                    accent={g.color}
+                    delay={i * 0.05 + j * 0.05}
                   />
                 ))}
               </div>
@@ -166,28 +214,6 @@ export function Skills() {
           </motion.div>
         ))}
       </div>
-
-      {/* Bottom tech chips */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-10 flex flex-wrap gap-2 justify-center"
-      >
-        {[
-          "React", "TypeScript", "Next.js", "Java", "Python", "Node.js",
-          "PostgreSQL", "MongoDB", "Docker", "AWS", "Figma", "Git",
-          "TCP/IP", "REST API", "GraphQL", "Spring Boot",
-        ].map((tech) => (
-          <span
-            key={tech}
-            className="px-3 py-1 rounded-full border border-border bg-card/60 text-sm text-muted-foreground hover:border-primary/50 hover:text-foreground transition-all cursor-default hover:scale-105"
-          >
-            {tech}
-          </span>
-        ))}
-      </motion.div>
     </Section>
   );
 }
