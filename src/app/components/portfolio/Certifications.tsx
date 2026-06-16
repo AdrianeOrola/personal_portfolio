@@ -4,7 +4,7 @@ import { Section } from "./Section";
 import { Award, ExternalLink, Calendar, Building2, Hash, Download, Maximize2, X } from "lucide-react";
 import ic3CertPdf from "../../../imports/IC3_PASSED_CERT.pdf?url";
 import ic3CertImage from "../../../imports/image-6.png";
-
+import web3CertImage from "../../../imports/Web3_Cert.png";
 type Certification = {
   id: string;
   title: string;
@@ -26,6 +26,15 @@ const certifications: Certification[] = [
     image: ic3CertImage,
     pdf: ic3CertPdf,
     color: "#10b981",
+  },
+  {
+    id: "web3-basics-2026",  // 👈 new entry
+    title: "Web3 Basics: Introduction to Blockchain & Digital Opportunities",
+    issuer: "Cryptita Plays / NU LIPA",
+    date: "April 30, 2026",
+    credentialId: "CRPTTPLYS:046:26:A",
+    image: web3CertImage,
+    color: "#8b5cf6", // purple to match the cert's color theme
   },
 ];
 
