@@ -1,7 +1,7 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
-  Download,
+  Mail,
   Github,
   Linkedin,
   Twitter,
@@ -20,19 +20,26 @@ const ROLES = [
 ];
 
 export function Hero() {
+  const reduceMotion = useReducedMotion();
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [roleIdx, setRoleIdx] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [typing, setTyping] = useState(true);
 
   useEffect(() => {
+    if (reduceMotion) return;
     const handler = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", handler);
     return () => window.removeEventListener("mousemove", handler);
-  }, []);
+  }, [reduceMotion]);
 
   // Typewriter effect
   useEffect(() => {
+    if (reduceMotion) {
+      setDisplayed("Full-Stack Developer");
+      return;
+    }
+
     const target = ROLES[roleIdx];
     let timeout: ReturnType<typeof setTimeout>;
 
@@ -59,7 +66,7 @@ export function Hero() {
       }
     }
     return () => clearTimeout(timeout);
-  }, [displayed, typing, roleIdx]);
+  }, [displayed, typing, roleIdx, reduceMotion]);
 
   return (
     <section
@@ -68,7 +75,7 @@ export function Hero() {
     >
       {/* Mouse-tracked radial glow */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-50 transition-all duration-300"
+        className="pointer-events-none absolute inset-0 opacity-50 transition-[background] duration-300"
         style={{
           background: `radial-gradient(700px circle at ${pos.x}px ${pos.y}px, var(--vibrant-muted), transparent 60%)`,
         }}
@@ -91,10 +98,7 @@ export function Hero() {
         {/* Left content */}
         <div>
           {/* Name */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
+          <h1
             style={{
               fontSize: "clamp(2.6rem, 6vw, 4.5rem)",
               lineHeight: 1.05,
@@ -114,13 +118,10 @@ export function Hero() {
               Adriane James Orola
             </span>
             .
-          </motion.h1>
+          </h1>
 
           {/* Typewriter role */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.12 }}
+          <div
             className="mt-2"
             style={{
               fontSize: "clamp(1.4rem, 3vw, 2rem)",
@@ -128,7 +129,8 @@ export function Hero() {
               fontWeight: 600,
             }}
           >
-            <span className="text-muted-foreground">
+            <span className="sr-only">Full-Stack Developer</span>
+            <span className="text-muted-foreground" aria-hidden="true">
               <span style={{ paddingRight: "0.15em" }}>{displayed}</span>
               <motion.span
                 animate={{ opacity: [1, 0, 1] }}
@@ -137,13 +139,10 @@ export function Hero() {
                 style={{ background: "var(--vibrant)" }}
               />
             </span>
-          </motion.div>
+          </div>
 
           {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+          <p
             className="mt-6 max-w-lg text-muted-foreground leading-relaxed"
             style={{ fontSize: "1.05rem" }}
           >
@@ -151,7 +150,7 @@ export function Hero() {
             software development, web technologies, and databases. I build
             responsive, user-friendly applications and love understanding how
             complex systems work end to end.
-          </motion.p>
+          </p>
 
           {/* CTA Buttons */}
           <motion.div
@@ -179,9 +178,9 @@ export function Hero() {
               className="rounded-full px-6 border-border/80 hover:border-primary/60"
               asChild
             >
-              <a href="#cv">
-                <Download className="w-4 h-4 mr-1.5" />
-                Download CV
+              <a href="#contact">
+                <Mail className="w-4 h-4 mr-1.5" />
+                Let's talk
               </a>
             </Button>
           </motion.div>
@@ -205,7 +204,7 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-10 h-10 grid place-items-center rounded-full border border-border/70 bg-card/60 backdrop-blur-sm hover:border-primary/60 hover:text-primary transition-all hover:scale-110 hover:shadow-sm"
+                className="w-10 h-10 grid place-items-center rounded-full border border-border/70 bg-card/60 backdrop-blur-sm hover:border-primary/60 hover:text-primary transition-[transform,border-color,color,box-shadow] duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
               >
                 <Icon className="w-4 h-4" />
               </a>
@@ -215,10 +214,7 @@ export function Hero() {
         </div>
 
         {/* Right: Code card */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+        <div
           className="relative aspect-[4/4.5] max-w-[400px] mx-auto w-full order-first lg:order-none mt-4 lg:mt-0"
         >
           {/* Glow */}
@@ -230,12 +226,12 @@ export function Hero() {
           {/* Main card */}
           <div className="relative h-full rounded-3xl border border-border bg-card/70 backdrop-blur-xl overflow-hidden shadow-2xl">
             {/* Profile image filling card */}
-            <motion.img
+            <img
               src={avatarImg}
               alt="Adriane James Orola"
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              width={960}
+              height={1280}
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
             />
 
@@ -290,14 +286,14 @@ export function Hero() {
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-20 -right-4 px-3 py-1.5 rounded-full border border-border bg-card/90 backdrop-blur-sm shadow-lg text-sm"
+              className="absolute top-20 right-4 px-3 py-1.5 rounded-full border border-border bg-card/90 backdrop-blur-sm shadow-lg text-sm"
             >
               ⚡ React
             </motion.div>
             <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-28 -left-4 px-3 py-1.5 rounded-full border border-border bg-card/90 backdrop-blur-sm shadow-lg text-sm"
+              className="absolute bottom-28 left-4 px-3 py-1.5 rounded-full border border-border bg-card/90 backdrop-blur-sm shadow-lg text-sm"
             >
               🐍 Python
             </motion.div>
@@ -316,7 +312,7 @@ export function Hero() {
               🌐 Networks
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll hint */}

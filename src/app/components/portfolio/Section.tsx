@@ -15,7 +15,7 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="relative py-24 px-6 overflow-hidden">
+    <section id={id} className="relative scroll-mt-16 py-20 px-6 overflow-hidden">
       {/* Subtle section separator glow */}
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-96 h-px opacity-30"
@@ -31,7 +31,7 @@ export function Section({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="mb-14 max-w-2xl"
+          className="mb-10 max-w-2xl"
         >
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2.5 mb-5">
@@ -49,6 +49,7 @@ export function Section({
 
           {/* Title */}
           <h2
+            className="text-balance"
             style={{
               fontSize: "clamp(1.9rem, 4vw, 2.8rem)",
               fontWeight: 700,
@@ -60,7 +61,7 @@ export function Section({
           </h2>
 
           {description && (
-            <p className="mt-4 text-muted-foreground leading-relaxed" style={{ fontSize: "1.05rem" }}>
+            <p className="mt-4 text-pretty text-muted-foreground leading-relaxed" style={{ fontSize: "1.05rem" }}>
               {description}
             </p>
           )}

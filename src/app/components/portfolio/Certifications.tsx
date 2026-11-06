@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Section } from "./Section";
 import { Award, ExternalLink, Calendar, Building2, Hash, Download, Maximize2, X } from "lucide-react";
 import ic3CertPdf from "../../../imports/IC3_PASSED_CERT.pdf?url";
-import ic3CertImage from "../../../imports/image-6.png";
-import web3CertImage from "../../../imports/Web3_Cert.png";
+import ic3CertImage from "../../../imports/ic3-cert-optimized.jpg";
+import web3CertImage from "../../../imports/web3-cert-optimized.jpg";
 type Certification = {
   id: string;
   title: string;
@@ -28,18 +28,42 @@ const certifications: Certification[] = [
     color: "#10b981",
   },
   {
-    id: "web3-basics-2026",  // 👈 new entry
+    id: "web3-basics-2026",
     title: "Web3 Basics: Introduction to Blockchain & Digital Opportunities",
     issuer: "Cryptita Plays / NU LIPA",
     date: "April 30, 2026",
     credentialId: "CRPTTPLYS:046:26:A",
     image: web3CertImage,
-    color: "#8b5cf6", // purple to match the cert's color theme
+    color: "#8b5cf6",
   },
 ];
 
 export function Certifications() {
   const [active, setActive] = useState<Certification | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const lastTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeModal = () => {
+    setActive(null);
+    requestAnimationFrame(() => lastTriggerRef.current?.focus());
+  };
+
+  useEffect(() => {
+    if (!active) return;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeModal();
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [active]);
 
   return (
     <Section
@@ -53,7 +77,7 @@ export function Certifications() {
           Certifications coming soon.
         </div>
       ) : (
-        <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div layout className="grid sm:grid-cols-2 gap-4">
           <AnimatePresence mode="popLayout">
             {certifications.map((c, i) => (
               <motion.button
@@ -64,8 +88,12 @@ export function Certifications() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
                 whileHover={{ y: -6 }}
-                onClick={() => setActive(c)}
-                className="group relative text-left rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-border/80"
+                onClick={(event) => {
+                  lastTriggerRef.current = event.currentTarget;
+                  setActive(c);
+                }}
+                aria-label={`Preview ${c.title}`}
+                className="group relative h-full flex flex-col text-left rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-[border-color,box-shadow] duration-300 hover:shadow-xl hover:border-border/80"
               >
                 <div className="h-1 w-full" style={{ background: c.color }} />
 
@@ -75,6 +103,10 @@ export function Certifications() {
                   <img
                     src={c.image}
                     alt={c.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={1400}
+                    height={1050}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div
@@ -90,7 +122,7 @@ export function Certifications() {
                   </div>
                 </div>
 
-                <div className="relative p-5">
+                <div className="relative p-5 flex flex-1 flex-col">
                   <div className="flex items-start justify-between mb-3 gap-3">
                     <div
                       className="w-10 h-10 rounded-xl grid place-items-center shrink-0"
@@ -110,7 +142,7 @@ export function Certifications() {
                     </span>
                   </div>
 
-                  <h3 style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>
+                  <h3 className="text-balance" style={{ fontWeight: 600, letterSpacing: "-0.01em" }}>
                     {c.title}
                   </h3>
 
@@ -127,7 +159,7 @@ export function Certifications() {
                   )}
 
                   <div
-                    className="mt-4 flex items-center gap-1.5 text-sm transition-colors"
+                    className="mt-auto pt-4 flex items-center gap-1.5 text-sm transition-colors"
                     style={{ color: c.color }}
                   >
                     <span>View certificate</span>
@@ -148,7 +180,7 @@ export function Certifications() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-            onClick={() => setActive(null)}
+            onClick={closeModal}
           >
             <div className="absolute inset-0 bg-background/70 backdrop-blur-md" />
 
@@ -159,6 +191,9 @@ export function Certifications() {
               transition={{ type: "spring", stiffness: 260, damping: 26 }}
               className="relative w-full max-w-5xl max-h-[92vh] rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="certificate-dialog-title"
             >
               <div
                 className="absolute top-0 left-0 right-0 h-1"
@@ -166,9 +201,10 @@ export function Certifications() {
               />
 
               <button
-                onClick={() => setActive(null)}
-                aria-label="Close"
-                className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full grid place-items-center bg-background/80 backdrop-blur border border-border hover:bg-background transition-colors"
+                ref={closeButtonRef}
+                onClick={closeModal}
+                aria-label="Close certificate preview"
+                className="absolute top-2 right-2 z-10 w-11 h-11 rounded-full grid place-items-center bg-background/80 backdrop-blur border border-border hover:bg-background transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -199,7 +235,7 @@ export function Certifications() {
                       </span>
                     )}
                   </div>
-                  <h3 style={{ fontSize: "1.25rem", letterSpacing: "-0.02em", fontWeight: 600 }}>
+                  <h3 id="certificate-dialog-title" style={{ fontSize: "1.25rem", letterSpacing: "-0.02em", fontWeight: 600 }}>
                     {active.title}
                   </h3>
                   <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -217,12 +253,13 @@ export function Certifications() {
                   transition={{ duration: 0.35, ease: "easeOut" }}
                   src={active.image}
                   alt={active.title}
+                  decoding="async"
                   className="mx-auto max-w-full h-auto max-h-[68vh] object-contain rounded-lg shadow-lg"
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 px-5 sm:px-7 py-4 border-t border-border/60 bg-card/60">
-                {active.pdf && (
+              {active.pdf && (
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 px-5 sm:px-7 py-4 border-t border-border/60 bg-card/60">
                   <a
                     href={active.pdf}
                     download
@@ -232,8 +269,8 @@ export function Certifications() {
                     <Download className="w-4 h-4" />
                     Download PDF
                   </a>
-                )}
-              </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

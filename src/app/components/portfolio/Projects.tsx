@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Section } from "./Section";
-import { Github, ExternalLink, Star, Clock } from "lucide-react";
-import jbmTradingImage from "../../../imports/image-2.png";
+import { ExternalLink, Clock, ArrowUpRight } from "lucide-react";
+import jbmTradingImage from "../../../imports/jbm-trading-optimized.jpg";
+import imSafeImage from "../../../imports/imsafe-v2-optimized.jpg";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -24,11 +25,10 @@ type Project = {
   emoji: string;
   image?: string;
   color: string;
+  accentTextClass: string;
+  badgeClass: string;
   status: "Live" | "In Progress" | "Archived";
   year: string;
-  featured?: boolean;
-  stars?: number;
-  github?: string;
   demo?: string;
 };
 
@@ -53,16 +53,47 @@ const projects: Project[] = [
     emoji: "🏪",
     image: jbmTradingImage,
     color: "#10b981",
+    accentTextClass: "text-emerald-700 dark:text-emerald-300",
+    badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200",
     status: "Live",
     year: "2025",
-    stars: 0,
-    featured: true,
-    github: "https://github.com/AdrianeOrola/JBM-TRADING",
     demo: "https://jbm-smart-trade.vercel.app/",
+  },
+  {
+    id: "2",
+    title: "iMSafe v2.0",
+    category: "Web",
+    tagline: "Community disaster reporting and response coordination platform",
+    description:
+      "iMSafe v2.0 is a full-stack disaster monitoring platform that turns community observations into response-ready incident records. It combines guided rapid assessments, precise Philippine location data, public report tracking, live operational dashboards, and official weather and hazard context to help communities and responders coordinate clearly.",
+    challenges:
+      "Designing a trustworthy end-to-end emergency workflow that captures enough structured detail for responders without slowing down people reporting under pressure, while keeping public status updates, live data, and sensitive evidence secure.",
+    features: [
+      "Guided, color-coded rapid incident assessments",
+      "Philippine location lookup & geolocation",
+      "Public report tracking with status updates",
+      "Live admin dashboard, maps & analytics",
+      "Evacuation capacity and hazard advisories",
+      "AI-assisted safety guidance and email alerts",
+    ],
+    tags: ["PHP", "MySQL", "JavaScript", "Leaflet", "OpenAI API", "HTML/CSS"],
+    emoji: "🚨",
+    image: imSafeImage,
+    color: "#14b8a6",
+    accentTextClass: "text-teal-700 dark:text-teal-300",
+    badgeClass: "bg-teal-100 text-teal-800 dark:bg-teal-950/70 dark:text-teal-200",
+    status: "Live",
+    year: "2026",
+    demo: "https://imsafev2.com/",
   },
 ];
 
-const categories = ["All", "Java", "Python", "Web", "Database", "Networking"] as const;
+type ProjectFilter = "All" | Project["category"];
+
+const categories: ProjectFilter[] = [
+  "All",
+  ...Array.from(new Set(projects.map((project) => project.category))),
+];
 
 const STATUS_COLORS: Record<string, string> = {
   Live: "#10b981",
@@ -71,8 +102,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function Projects() {
-  const [filter, setFilter] = useState<(typeof categories)[number]>("All");
+  const [filter, setFilter] = useState<ProjectFilter>("All");
   const [active, setActive] = useState<Project | null>(null);
+  const activeTrigger = useRef<HTMLButtonElement | null>(null);
 
   const visible =
     filter === "All" ? projects : projects.filter((p) => p.category === filter);
@@ -86,28 +118,42 @@ export function Projects() {
     >
       {/* Filter tabs */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {categories.map((c) => (
-          <button
-            key={c}
-            onClick={() => setFilter(c)}
-            className={`px-4 py-1.5 rounded-full border text-sm transition-all ${
-              filter === c
-                ? "border-primary text-primary-foreground"
-                : "border-border/70 text-muted-foreground hover:border-primary/50 hover:text-foreground"
-            }`}
-            style={
-              filter === c
-                ? { background: "var(--vibrant)", borderColor: "var(--vibrant)" }
-                : {}
-            }
-          >
-            {c}
-          </button>
-        ))}
+        {categories.map((c) => {
+          const count = c === "All"
+            ? projects.length
+            : projects.filter((project) => project.category === c).length;
+
+          return (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              aria-pressed={filter === c}
+              className={`min-h-10 px-4 rounded-full border text-sm inline-flex items-center gap-2 transition-[background-color,border-color,color] duration-200 ${
+                filter === c
+                  ? "border-primary text-primary-foreground"
+                  : "border-border/70 text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              }`}
+              style={
+                filter === c
+                  ? { background: "var(--vibrant)", borderColor: "var(--vibrant)" }
+                  : {}
+              }
+            >
+              <span>{c}</span>
+              <span
+                className={`text-[11px] tabular-nums ${
+                  filter === c ? "text-primary-foreground/75" : "text-muted-foreground/75"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Projects grid */}
-      <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div layout className="grid sm:grid-cols-2 gap-4">
         <AnimatePresence mode="popLayout">
           {visible.map((p) => (
             <motion.button
@@ -118,10 +164,11 @@ export function Projects() {
               exit={{ opacity: 0, scale: 0.94 }}
               transition={{ duration: 0.28 }}
               whileHover={{ y: -5 }}
-              onClick={() => setActive(p)}
-              className={`group relative text-left rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-shadow hover:shadow-lg ${
-                p.featured ? "lg:col-span-2" : ""
-              }`}
+              onClick={(event) => {
+                activeTrigger.current = event.currentTarget;
+                setActive(p);
+              }}
+              className="group relative h-full flex flex-col text-left rounded-2xl border border-border bg-card/60 backdrop-blur-sm overflow-hidden transition-shadow hover:shadow-lg"
             >
               {/* Color header strip */}
               <div
@@ -135,6 +182,10 @@ export function Projects() {
                   <img
                     src={p.image}
                     alt={p.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={1280}
+                    height={720}
                     className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* Bottom fade for legibility */}
@@ -150,7 +201,7 @@ export function Projects() {
                 }}
               />
 
-              <div className="relative p-6">
+              <div className="relative p-6 flex flex-1 flex-col">
                 {/* Top row */}
                 <div className="flex items-start justify-between mb-4 gap-3">
                   {!p.image && <div className="text-4xl">{p.emoji}</div>}
@@ -166,11 +217,7 @@ export function Projects() {
                   )}
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span
-                      className="text-xs px-2 py-0.5 rounded-full"
-                      style={{
-                        background: `${p.color}20`,
-                        color: p.color,
-                      }}
+                      className={`text-xs px-2 py-0.5 rounded-full ${p.badgeClass}`}
                     >
                       {p.category}
                     </span>
@@ -190,7 +237,7 @@ export function Projects() {
                     {p.title}
                   </h3>
                 )}
-                <p className="mt-1 text-muted-foreground text-sm line-clamp-2">
+                <p className="mt-1 text-pretty text-muted-foreground text-sm line-clamp-2">
                   {p.tagline}
                 </p>
 
@@ -199,24 +246,26 @@ export function Projects() {
                   {p.tags.slice(0, 3).map((t) => (
                     <span
                       key={t}
-                      className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
+                      className="text-xs px-2 py-0.5 rounded-md bg-muted text-foreground/70"
                     >
                       {t}
                     </span>
                   ))}
                   {p.tags.length > 3 && (
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-muted text-foreground/70">
                       +{p.tags.length - 3}
                     </span>
                   )}
                 </div>
 
                 {/* Footer row */}
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Star className="w-3.5 h-3.5" />
-                    <span className="text-xs">{p.stars}</span>
-                  </div>
+                <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+                  <span
+                    className={`inline-flex items-center gap-1 text-xs font-medium ${p.accentTextClass}`}
+                  >
+                    View project
+                    <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </span>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Clock className="w-3.5 h-3.5" />
                     <span className="text-xs">{p.year}</span>
@@ -230,7 +279,13 @@ export function Projects() {
 
       {/* Detail modal */}
       <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            activeTrigger.current?.focus();
+          }}
+        >
           {active && (
             <>
               {/* Color bar */}
@@ -244,6 +299,7 @@ export function Projects() {
                   <img
                     src={active.image}
                     alt={active.title}
+                    decoding="async"
                     className="w-full h-auto max-h-[300px] object-contain"
                   />
                 </div>
@@ -255,11 +311,7 @@ export function Projects() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span
-                        className="text-xs px-2.5 py-0.5 rounded-full"
-                        style={{
-                          background: `${active.color}20`,
-                          color: active.color,
-                        }}
+                        className={`text-xs px-2.5 py-0.5 rounded-full ${active.badgeClass}`}
                       >
                         {active.category}
                       </span>
@@ -335,37 +387,25 @@ export function Projects() {
                 </div>
               </div>
 
-              {/* Stars */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4" style={{ color: "#f59e0b" }} />
-                  <span>{active.stars} stars on GitHub</span>
+              {/* Live demo action */}
+              {active.demo && (
+                <div className="flex gap-3 pt-1">
+                  <Button
+                    asChild
+                    className="rounded-xl"
+                    style={{
+                      background: "var(--vibrant)",
+                      color: "#fff",
+                      border: "none",
+                    }}
+                  >
+                    <a href={active.demo} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-4 h-4 mr-1.5" />
+                      Live Demo
+                    </a>
+                  </Button>
                 </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-3 pt-1">
-                <Button
-                  asChild
-                  className="rounded-xl"
-                  style={{
-                    background: "var(--vibrant)",
-                    color: "#fff",
-                    border: "none",
-                  }}
-                >
-                  <a href={active.demo || "#"} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-1.5" />
-                    Live Demo
-                  </a>
-                </Button>
-                <Button variant="outline" asChild className="rounded-xl">
-                  <a href={active.github || "#"} target="_blank" rel="noopener noreferrer">
-                    <Github className="w-4 h-4 mr-1.5" />
-                    View Source
-                  </a>
-                </Button>
-              </div>
+              )}
             </>
           )}
         </DialogContent>

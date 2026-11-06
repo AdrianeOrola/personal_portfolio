@@ -50,14 +50,24 @@ const SOCIALS = [
   },
 ];
 
+type FormStatus = {
+  kind: "idle" | "success" | "error";
+  message: string;
+};
+
 export function Contact() {
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [formStatus, setFormStatus] = useState<FormStatus>({
+    kind: "idle",
+    message: "Your message is sent directly to my inbox. No spam, ever.",
+  });
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
+    setFormStatus({ kind: "idle", message: "Sending your message..." });
 
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value;
@@ -82,16 +92,24 @@ export function Contact() {
 
       if (!res.ok) {
         console.error("Contact form error response:", data);
-        toast.error(data?.error ?? "Something went wrong. Please try again.");
+        const errorMessage = data?.error ?? "Something went wrong. Please try again.";
+        setFormStatus({ kind: "error", message: errorMessage });
+        toast.error(errorMessage);
       } else {
         setSent(true);
+        setFormStatus({
+          kind: "success",
+          message: "Message sent. I'll reply within 24 hours.",
+        });
         toast.success("Message sent — I'll reply within 24 hours! 🎉");
         form.reset();
         setTimeout(() => setSent(false), 4000);
       }
     } catch (err) {
       console.error("Contact form fetch error:", err);
-      toast.error("Network error. Please check your connection and try again.");
+      const errorMessage = "Network error. Please check your connection and try again.";
+      setFormStatus({ kind: "error", message: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -142,7 +160,13 @@ export function Contact() {
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Email</div>
-                <div className="text-sm" style={{ fontWeight: 500 }}>adrianeorola10@gmail.com</div>
+                <a
+                  href="mailto:adrianeorola10@gmail.com"
+                  className="text-sm hover:text-primary transition-colors"
+                  style={{ fontWeight: 500 }}
+                >
+                  adrianeorola10@gmail.com
+                </a>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -179,7 +203,7 @@ export function Contact() {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/60 backdrop-blur-sm hover:border-primary/40 hover:shadow-sm transition-all group"
+                className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/60 backdrop-blur-sm hover:border-primary/40 hover:shadow-sm transition-[border-color,box-shadow] duration-200 group"
               >
                 <div
                   className="w-9 h-9 rounded-xl grid place-items-center"
@@ -207,6 +231,7 @@ export function Contact() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
           onSubmit={handleSubmit}
+          aria-busy={submitting}
           className="p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-sm space-y-4 relative"
         >
           {/* Success overlay */}
@@ -215,6 +240,9 @@ export function Contact() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="absolute inset-0 rounded-2xl bg-background/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
             >
               <CheckCircle2
                 className="w-12 h-12"
@@ -234,6 +262,8 @@ export function Contact() {
                 id="name"
                 name="name"
                 required
+                aria-required="true"
+                autoComplete="name"
                 placeholder="Jane Doe"
                 className="rounded-xl"
               />
@@ -245,6 +275,8 @@ export function Contact() {
                 name="email"
                 type="email"
                 required
+                aria-required="true"
+                autoComplete="email"
                 placeholder="jane@example.com"
                 className="rounded-xl"
               />
@@ -256,6 +288,7 @@ export function Contact() {
             <Input
               id="subject"
               name="subject"
+                autoComplete="off"
               placeholder="Project inquiry / Job opportunity"
               className="rounded-xl"
             />
@@ -267,6 +300,7 @@ export function Contact() {
               id="message"
               name="message"
               required
+                aria-required="true"
               rows={5}
               placeholder="Tell me about your project or opportunity..."
               className="rounded-xl resize-none"
@@ -276,6 +310,7 @@ export function Contact() {
           <Button
             type="submit"
             disabled={submitting}
+            aria-describedby="contact-form-status"
             className="w-full rounded-xl group h-11"
             style={{
               background: submitting ? undefined : "var(--vibrant)",
@@ -300,8 +335,19 @@ export function Contact() {
             )}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Your message is sent directly to my inbox. No spam, ever.
+          <p
+            id="contact-form-status"
+            role={formStatus.kind === "error" ? "alert" : "status"}
+            aria-live="polite"
+            className={`text-xs text-center ${
+              formStatus.kind === "error"
+                ? "text-destructive"
+                : formStatus.kind === "success"
+                  ? "text-emerald-500"
+                  : "text-muted-foreground"
+            }`}
+          >
+            {formStatus.message}
           </p>
         </motion.form>
       </div>

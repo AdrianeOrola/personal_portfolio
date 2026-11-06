@@ -37,21 +37,31 @@ export function Navbar({
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= 100) current = id;
+          if (rect.top <= Math.min(200, window.innerHeight * 0.3)) current = id;
         }
       }
       setActiveSection(current);
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [open]);
 
   return (
     <motion.header
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${
         scrolled
           ? "backdrop-blur-xl bg-background/80 border-b border-border/60 shadow-sm"
           : "bg-transparent"
@@ -96,6 +106,7 @@ export function Navbar({
               <a
                 key={l.href}
                 href={l.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`relative px-4 py-2 rounded-lg text-sm transition-colors ${
                   isActive
                     ? "text-foreground"
@@ -120,8 +131,9 @@ export function Navbar({
             variant="ghost"
             size="icon"
             onClick={onToggleTheme}
-            aria-label="Toggle theme"
-            className="rounded-full w-9 h-9"
+            aria-label={`Switch to ${dark ? "light" : "dark"} theme`}
+            title={`Switch to ${dark ? "light" : "dark"} theme`}
+            className="rounded-full w-10 h-10"
           >
             <motion.span
               key={dark ? "moon" : "sun"}
@@ -137,8 +149,11 @@ export function Navbar({
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden rounded-full w-9 h-9"
+            className="md:hidden rounded-full w-10 h-10"
             onClick={() => setOpen((o) => !o)}
+            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
@@ -158,7 +173,9 @@ export function Navbar({
       {/* Mobile menu */}
       <AnimatePresence>
         {open && (
-          <motion.div
+          <motion.nav
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -170,6 +187,7 @@ export function Navbar({
                 <motion.a
                   key={l.href}
                   href={l.href}
+                  aria-current={activeSection === l.href.slice(1) ? "page" : undefined}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
@@ -184,7 +202,7 @@ export function Navbar({
                 </motion.a>
               ))}
             </div>
-          </motion.div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </motion.header>

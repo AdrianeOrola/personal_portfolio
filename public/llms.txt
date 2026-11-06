@@ -1,0 +1,21 @@
+# Adriane Orola — Full-Stack Developer Portfolio
+
+> Portfolio of Adriane James Orola, a BSIT student and full-stack developer based in Batangas, Philippines.
+
+## Main sections
+
+- [About Adriane](/#about)
+- [Technical skills](/#skills)
+- [Selected projects](/#projects)
+- [Certifications](/#certifications)
+- [Contact](/#contact)
+
+## Featured project
+
+- [iMSafe v2.0 live demo](https://imsafev2.com/)
+
+## Contact
+
+- [Email Adriane](mailto:adrianeorola10@gmail.com)
+- [GitHub](https://github.com/AdrianeOrola)
+- [LinkedIn](https://www.linkedin.com/in/adriane-orola-694242319/)

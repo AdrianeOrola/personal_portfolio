@@ -3,7 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Adriane Orola</title>
+    <meta name="theme-color" content="#0b0c11" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="author" content="Adriane James Orola" />
+    <meta
+      name="description"
+      content="Portfolio of Adriane James Orola, a BSIT student and full-stack developer building responsive web applications, databases, and digital systems."
+    />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_PH" />
+    <meta property="og:site_name" content="Adriane Orola Portfolio" />
+    <meta property="og:title" content="Adriane Orola | Full-Stack Developer Portfolio" />
+    <meta
+      property="og:description"
+      content="Explore Adriane Orola's full-stack projects, technical skills, certifications, and contact information."
+    />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Adriane Orola | Full-Stack Developer Portfolio" />
+    <meta
+      name="twitter:description"
+      content="Full-stack projects, technical skills, certifications, and contact information."
+    />
+    <meta name="twitter:image" content="/og-image.jpg" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href="/src/imports/image-7.png" />
+    <title>Adriane Orola | Full-Stack Developer Portfolio</title>
+
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem("portfolio-theme");
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const useDarkTheme = savedTheme ? savedTheme === "dark" : prefersDark;
+          document.documentElement.classList.toggle("dark", useDarkTheme);
+          document.documentElement.style.colorScheme = useDarkTheme ? "dark" : "light";
+        } catch {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Adriane James Orola",
+        "jobTitle": "Full-Stack Developer",
+        "description": "BSIT student and full-stack developer based in Batangas, Philippines.",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "Batangas",
+          "addressCountry": "PH"
+        },
+        "sameAs": [
+          "https://github.com/AdrianeOrola",
+          "https://www.linkedin.com/in/adriane-orola-694242319/",
+          "https://x.com/lohdri",
+          "https://www.instagram.com/adriholiczx/"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

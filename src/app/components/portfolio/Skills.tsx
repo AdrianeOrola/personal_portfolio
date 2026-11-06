@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-type Tech = { name: string; slug: string; color: string };
+type Tech = { name: string; slug?: string; color: string };
 
 const groups: {
   icon: typeof Code2;
@@ -77,10 +77,10 @@ const groups: {
     color: "#ec4899",
     items: [
       { name: "Figma", slug: "figma", color: "F24E1E" },
-      { name: "Adobe XD", slug: "adobexd", color: "FF61F6" },
-      { name: "Photoshop", slug: "adobephotoshop", color: "31A8FF" },
+      { name: "Adobe XD", color: "FF61F6" },
+      { name: "Photoshop", color: "31A8FF" },
       { name: "Framer", slug: "framer", color: "0055FF" },
-      { name: "Canva", slug: "canva", color: "00C4CC" },
+      { name: "Canva", color: "00C4CC" },
       { name: "Storybook", slug: "storybook", color: "FF4785" },
     ],
   },
@@ -93,7 +93,7 @@ const groups: {
       { name: "GitHub", slug: "github", color: "FFFFFF" },
       { name: "Docker", slug: "docker", color: "2496ED" },
       { name: "Vercel", slug: "vercel", color: "FFFFFF" },
-      { name: "VS Code", slug: "visualstudiocode", color: "007ACC" },
+      { name: "VS Code", color: "007ACC" },
       { name: "Linux", slug: "linux", color: "FCC624" },
     ],
   },
@@ -120,14 +120,8 @@ function TechLogo({
       className="group/logo relative flex flex-col items-center gap-2"
       title={tech.name}
     >
-      <motion.div
-        animate={{ y: [0, -3, 0] }}
-        transition={{
-          duration: 3 + ((delay * 4) % 2),
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl grid place-items-center transition-all duration-300 ring-1 ring-white/10"
+      <div
+        className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl grid place-items-center transition-[transform,box-shadow] duration-300 ring-1 ring-white/10"
         style={{
           background:
             "linear-gradient(145deg, #1a2030 0%, #0b0f1a 100%)",
@@ -138,22 +132,24 @@ function TechLogo({
           className="pointer-events-none absolute -inset-1 rounded-2xl opacity-0 group-hover/logo:opacity-50 blur-lg transition-opacity duration-300"
           style={{ background: accent }}
         />
-        {failed ? (
+        {!tech.slug || failed ? (
           <Box
             className="relative w-6 h-6 sm:w-7 sm:h-7"
             style={{ color: accent }}
-            aria-label={`${tech.name} (logo unavailable)`}
+            aria-hidden="true"
           />
         ) : (
           <img
             src={`https://cdn.simpleicons.org/${tech.slug}/${tech.color}`}
-            alt={tech.name}
+            alt=""
+            aria-hidden="true"
             loading="lazy"
+            decoding="async"
             onError={() => setFailed(true)}
             className="relative w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform duration-300 group-hover/logo:scale-110"
           />
         )}
-      </motion.div>
+      </div>
       <span className="text-[10px] sm:text-[11px] text-muted-foreground text-center leading-tight">
         {tech.name}
       </span>

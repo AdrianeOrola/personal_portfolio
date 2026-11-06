@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MotionConfig } from "motion/react";
 import { Toaster } from "./components/ui/sonner";
 import { Navbar } from "./components/portfolio/Navbar";
 import { Hero } from "./components/portfolio/Hero";
@@ -8,35 +9,23 @@ import { Projects } from "./components/portfolio/Projects";
 import { Certifications } from "./components/portfolio/Certifications";
 import { Contact } from "./components/portfolio/Contact";
 import { Footer } from "./components/portfolio/Footer";
-import { Loader } from "./components/portfolio/Loader";
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from "@vercel/analytics/react";
 
 
 export default function App() {
-  const [dark, setDark] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [dark, setDark] = useState(() =>
+    document.documentElement.classList.contains("dark"),
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
+    localStorage.setItem("portfolio-theme", dark ? "dark" : "light");
   }, [dark]);
 
-  useEffect(() => {
-    document.documentElement.style.scrollBehavior = "smooth";
-    const t = setTimeout(() => setLoading(false), 2400);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased">
-      <Loader show={loading} />
-
-      <div
-        style={{
-          opacity: loading ? 0 : 1,
-          transition: "opacity 0.5s ease",
-          pointerEvents: loading ? "none" : "auto",
-        }}
-      >
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-background text-foreground antialiased">
         <Navbar dark={dark} onToggleTheme={() => setDark((d) => !d)} />
         <main>
           <Hero />
@@ -47,22 +36,22 @@ export default function App() {
           <Contact />
         </main>
         <Footer />
-      </div>
 
-      {/* Analytics and Toast components placed at the root level */}
-      <Analytics />
-      
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            borderRadius: "12px",
-            background: "var(--card)",
-            border: "1px solid var(--border)",
-            color: "var(--foreground)",
-          },
-        }}
-      />
-    </div>
+        {/* Analytics and Toast components placed at the root level */}
+        <Analytics />
+
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              borderRadius: "12px",
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              color: "var(--foreground)",
+            },
+          }}
+        />
+      </div>
+    </MotionConfig>
   );
 }

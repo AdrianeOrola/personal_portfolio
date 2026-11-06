@@ -17,7 +17,10 @@ const socials = [
 ];
 
 export function Footer() {
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollTop = () => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  };
 
   return (
     <footer className="border-t border-border/60 pt-12 pb-8 px-6 relative">
@@ -104,7 +107,7 @@ export function Footer() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={scrollTop}
-              className="w-8 h-8 rounded-full border border-border grid place-items-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+              className="w-10 h-10 rounded-full border border-border grid place-items-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-[transform,border-color,color] duration-200"
               aria-label="Scroll to top"
             >
               <ArrowUp className="w-3.5 h-3.5" />

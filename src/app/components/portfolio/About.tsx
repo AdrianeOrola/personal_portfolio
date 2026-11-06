@@ -36,9 +36,9 @@ const interests = [
 ];
 
 const STATS = [
-  { value: 3, suffix: "", label: "Projects completed" },
-  { value: 3, suffix: "", label: "GitHub repos" },
-  { value: 1, suffix: "", label: "Certification earned" },
+  { value: 2, suffix: "", label: "Live projects" },
+  { value: 2, suffix: "", label: "Certifications earned" },
+  { value: 2, suffix: "+", label: "Years building" },
 ];
 
 function AnimatedCounter({
@@ -95,6 +95,8 @@ export function About() {
         {STATS.map((s, i) => (
           <motion.div
             key={s.label}
+            role="group"
+            aria-label={`${s.value}${s.suffix} ${s.label}`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -102,6 +104,7 @@ export function About() {
             className="p-5 rounded-2xl border border-border bg-card/60 backdrop-blur-sm text-center group hover:border-primary/40 transition-colors"
           >
             <div
+              aria-hidden="true"
               className="tabular-nums mb-1"
               style={{
                 fontSize: "2rem",
@@ -112,7 +115,7 @@ export function About() {
             >
               <AnimatedCounter value={s.value} suffix={s.suffix} inView={statsInView} />
             </div>
-            <div className="text-sm text-muted-foreground">{s.label}</div>
+            <div aria-hidden="true" className="text-sm text-muted-foreground">{s.label}</div>
           </motion.div>
         ))}
       </div>
